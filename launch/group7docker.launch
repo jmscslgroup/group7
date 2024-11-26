@@ -34,7 +34,7 @@
 	  <node pkg="group7" type="group7" name="group7_node">
 		<remap from="/car/state/vel_x" to="/egocar/vel_x" />
 		<remap from="/light_dist" to="/subtractor/light_dist" />
-		<remap from="/light_change_time" to="/oneshot/light_time" />
+		<remap from="/light_change_time" to="/subtractor/light_change_time" />
 		<remap from="/cmd_accel" to="/egocar/cmd_accel" />
 	  </node>
   </group>
@@ -64,6 +64,12 @@
 	<remap from="in1" to="/oneshot/light_dist" />
     	<remap from="in2" to="/egocar/odom_x" />
 	<remap from="diff" to="/subtractor/light_dist" />
+  </node>
+
+  <node pkg="subtractor" type="subtractor" name="subtractor_clock">
+	<remap from="in1" to="/oneshot/light_time" />
+    	<remap from="in2" to="/clock_secs" />
+	<remap from="diff" to="/subtractor/light_change_time" />
   </node>
 
   
