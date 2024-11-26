@@ -55,6 +55,9 @@
     <remap from="vel_x" to="/car/state/vel_x"/>
   </node>
 	
+  <node pkg="modeChange" type="modeChanger" name="modeChanger_node">
+  </node>
+	
 <!-- CBF params -->
   <arg name="description" default="group7undergrad_controller2"/>
 
