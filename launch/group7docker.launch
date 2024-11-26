@@ -1,0 +1,73 @@
+<launch>
+
+  <!-- In this launchfile, we demonstrate how to set some initial variables as parameters,
+  	how to record the output file to a place that is persistent, and how to 
+	use a namespace for the node in which we are running. -->
+
+  <!-- change the output directory and prefix if this is not where yours is mapped -->
+  <arg name="bagfileout" default="/ros/catkin_ws/group7"/>
+
+  <!-- sets the default offset position of the traffic signal. -->
+  <!-- this will be read in after the simulation starts -->
+  <arg name="light_dist_default" default="500.0" />
+
+  <!-- sets the default offset time of the traffic signal change. -->
+  <!-- this will be read in after the simulation starts -->
+  <arg name="light_time_default" default="40.0" />
+
+  <!-- sets the initial velocity of the ego car. -->
+  <param name="/egocar/v0" type="double" value="10.0" />
+  <!-- sets the initial position of the ego car. -->
+  <param name="/egocar/x0" type="double" value="0.0" />
+
+  <!-- change the start time if needed -->
+  <node pkg="rosbag" type="play" name="rosbag_player" args="/ros/catkin_ws/mytest.bag --topics /car/state/vel_x -s 100 --clock">
+    <!-- remap the output to go into the desired car -->
+	<remap from="/car/state/vel_x" to="/leadcar/vel_x" />
+  </node>
+
+  <!-- By putting this car into a namespace, we keep the variables clean -->
+  <group ns="egocar">
+  	  <!-- the car simple simulink will output our odometry automagically -->
+	  <node pkg="carsimplesimulink" type="carsimplesimulink" name="carsimplesimulink_node">
+   	  </node>
+	  <node pkg="group7" type="group7" name="group7_node">
+		<remap from="/car/state/vel_x" to="/egocar/vel_x" />
+		<remap from="/light_dist" to="/subtractor/light_dist" />
+		<remap from="/light_change_time" to="/oneshot/light_time" />
+		<remap from="/cmd_accel" to="/egocar/cmd_accel" />
+	  </node>
+  </group>
+
+  <!-- publish as a value the one-shot distance to the next light -->
+  <node pkg="rostopic" type="rostopic" name="node_light_dist" output="screen" args="pub /light_dist_default std_msgs/Float64 'data: $(arg light_dist_default)'" />
+
+  <!-- publish as a value the one-shot time to the next light -->
+  <node pkg="rostopic" type="rostopic" name="node_light_time" output="screen" args="pub /light_time_default std_msgs/Float64 'data: $(arg light_time_default)'" />
+
+  <node pkg="clock2seconds" type="clock2seconds" name="clock2seconds_node">
+  </node>
+
+  <node pkg="oneshotadder" type="oneshotadder" name="oneshot_light_dist">
+      <remap from="in1" to="/egocar/odom_x"/>
+      <remap from="in2" to="/light_dist_default"/>
+      <remap from="output" to="/oneshot/light_dist"/>
+  </node>
+
+  <node pkg="oneshotadder" type="oneshotadder" name="oneshot_light_time">
+      <remap from="in1" to="/clock_secs"/>
+      <remap from="in2" to="/light_time_default"/>
+      <remap from="output" to="/oneshot/light_time"/>
+  </node>
+
+  <node pkg="subtractor" type="subtractor" name="subtractor_odom">
+	<remap from="in1" to="/oneshot/light_dist" />
+    	<remap from="in2" to="/egocar/odom_x" />
+	<remap from="diff" to="/subtractor/light_dist" />
+  </node>
+
+  
+  <!-- change the output directory if this is not where yours is mapped -->
+  <node pkg="rosbag" type="record" name="rosbag_recorder" args="-a -o $(arg bagfileout)" />
+  
+</launch>
