@@ -28,7 +28,7 @@
   </node>
 
   <node pkg="oneshotadder" type="oneshotadder" name="oneshot_light_dist">
-      <remap from="in1" to="/egocar/odom_x"/>
+      <remap from="in1" to="/odom"/>
       <remap from="in2" to="/light_dist_default"/>
       <remap from="output" to="/oneshot/light_dist"/>
   </node>
@@ -41,7 +41,7 @@
 
   <node pkg="subtractor" type="subtractor" name="subtractor_odom">
 	<remap from="in1" to="/oneshot/light_dist" />
-    	<remap from="in2" to="/egocar/odom_x" />
+    	<remap from="in2" to="/odom" />
 	<remap from="diff" to="/subtractor/light_dist" />
   </node>
 	
