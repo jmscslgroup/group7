@@ -25,6 +25,6 @@ apps:
         - owner: jmscslgroup
           repo: odometer
         - owner: jmscslgroup
-          repo: modeChanger
+          repo: modechanger
         - owner: jmscslgroup
           repo: subtractor
